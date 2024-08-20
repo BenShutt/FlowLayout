@@ -28,11 +28,11 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
 
     // MARK: - Helper
 
-    var numberOfSections: Int {
+    open var numberOfSections: Int {
         flowLayout.frames.count
     }
 
-    func numberOfItemsInSection(section: Int) -> Int {
+    open func numberOfItemsInSection(section: Int) -> Int {
         flowLayout.frames[section].count
     }
 
