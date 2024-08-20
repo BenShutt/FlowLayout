@@ -42,15 +42,6 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
     /// Shorthand to get the `padding` of `configuration`
     private var padding: EdgeInsets { configuration.padding }
 
-    // MARK: - Computed
-
-    /// Available width to layout in.
-    /// Elements with a width more than this will not be added
-    private var maxWidth: CGFloat {
-        let hPadding = padding.leading + padding.trailing
-        return collectionViewSize.width - hPadding
-    }
-
     // MARK: - Init
 
     /// Public memberwise initializer
@@ -104,6 +95,11 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
 
         // Check that the element will fit
         guard size.width > 0, size.height > 0 else { return }
+
+        // Available width to layout in.
+        // Elements with a width more than this will not be added
+        let hPadding = padding.leading + padding.trailing
+        let maxWidth = collectionViewSize.width - hPadding
         guard size.width <= maxWidth else { return }
 
         // Check if it fits on this existing row
@@ -124,15 +120,18 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
     /// - Parameter elements: The elements to layout
     /// - Returns: The elements and their associated frames
     open func build(elements: [Element]) -> FlowLayout<Element> {
-        guard maxWidth > 0 else { return FlowLayout() }
-
+        // Iterate through the elements and compute their frames
         reset()
         elements.forEach { add(element: $0) }
         if !currentRow.isEmpty {
             commitCurrentLine()
         }
 
+        // Get the maxY coordinate of the last row.
+        // If there are no elements return empty
         guard let maxY = frames.last?.maxY else { return FlowLayout() }
+
+        // Return the build result
         return .init(
             contentSize: .init(
                 width: collectionViewSize.width,
