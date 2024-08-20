@@ -100,7 +100,7 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
     /// Layout the given element into its respective row
     /// - Parameter element: Element to layout
     private func add(element: Element) {
-        let size = element.cellSize(in: collectionViewSize)
+        let size = element.size(in: collectionViewSize)
 
         // Check that the element will fit
         guard size.width > 0, size.height > 0 else { return }

@@ -1,0 +1,197 @@
+//
+//  PreviewView.swift
+//  FlowLayout
+//
+//  Created by Ben Shutt on 20/08/2024.
+//
+
+import SwiftUI
+
+// MARK: - Block
+
+struct Block: FlowLayoutSized {
+    var width: CGFloat
+    var height: CGFloat
+    var color: Color
+
+    func size(in collectionViewSize: CGSize) -> CGSize {
+        .init(width: width, height: height)
+    }
+}
+
+// MARK: - Blocks
+
+@MainActor final class BlockManager: ObservableObject {
+    @Published private(set) var blocks: [Block] = []
+
+    func build() async {
+        blocks = (1...100).map { _ in
+            Block(
+                width: CGFloat(Int.random(in: 20...200)),
+                height: CGFloat(Int.random(in: 30...100)),
+                color: .init(
+                    red: .random(in: 0...1),
+                    green: .random(in: 0...1),
+                    blue: .random(in: 0...1)
+                )
+            )
+        }
+    }
+}
+
+// MARK: - BlockView
+
+struct BlockView: View {
+    var block: Block
+
+    private var title: String {
+        "\(Int(block.width)), \(Int(block.height))"
+    }
+
+    var body: some View {
+        block.color.opacity(0.2)
+            .frame(width: block.width, height: block.height)
+            .overlay {
+                Text(title)
+                    .font(.system(size: 20))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.25)
+                    .foregroundStyle(Color.black)
+                    .padding(2)
+            }
+            .clipShape(.rect(cornerRadius: 5))
+    }
+}
+
+// MARK: - CollectionViewController
+
+class CollectionViewController: UICollectionViewController {
+    typealias Layout = CollectionViewFlowLayout<Block>
+    private let reuseIdentifier = "Cell"
+
+    private var layout: Layout {
+        let layout = collectionViewLayout as? Layout
+        guard let layout else { fatalError("Layout") }
+        return layout
+    }
+
+    func setBlocks(blocks: [Block]) {
+        layout.redraw(blocks)
+        guard isViewLoaded else { return }
+        collectionView.reloadData()
+    }
+
+    // MARK: - Init
+
+    init() {
+        let layout = Layout()
+        layout.configuration = .init(
+            hSpacing: 10,
+            vSpacing: 20,
+            padding: .init(top: 5, leading: 5, bottom: 5, trailing: 5)
+        )
+        super.init(collectionViewLayout: layout)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - ViewController Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        collectionView.register(
+            UICollectionViewCell.self,
+            forCellWithReuseIdentifier: reuseIdentifier
+        )
+    }
+
+    // MARK: - UICollectionViewDataSource
+
+    override func numberOfSections(
+        in collectionView: UICollectionView
+    ) -> Int {
+        layout.layout.frames.count
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
+        layout.layout.frames[section].count
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let model = layout[indexPath]
+
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: reuseIdentifier,
+            for: indexPath
+        )
+        cell.contentConfiguration = UIHostingConfiguration {
+            Button(action: {
+                // Implement...
+            }, label: {
+                BlockView(block: model.element)
+            })
+            .buttonStyle(PlainButtonStyle())
+        }
+        .background(Color.clear)
+        .margins(.all, 0)
+        return cell
+    }
+
+    // MARK: - UICollectionViewDelegate
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        // Cell button handles the tap
+        collectionView.deselectItem(
+            at: indexPath,
+            animated: false
+        )
+    }
+}
+
+// MARK: - CollectionView
+
+struct CollectionView: UIViewControllerRepresentable {
+    @ObservedObject var manager: BlockManager
+
+    func makeUIViewController(context: Context) -> CollectionViewController {
+        CollectionViewController()
+    }
+
+    func updateUIViewController(
+        _ viewController: CollectionViewController,
+        context: Context
+    ) {
+        viewController.setBlocks(blocks: manager.blocks)
+    }
+}
+
+// MARK: - PreviewView
+
+struct PreviewView: View {
+    @StateObject private var manager = BlockManager()
+
+    var body: some View {
+        CollectionView(manager: manager)
+            .task {
+                await manager.build()
+            }
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    PreviewView()
+}

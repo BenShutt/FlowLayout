@@ -13,7 +13,7 @@ public protocol FlowLayoutSized {
     /// Get the size of an element given the size of the collection view
     /// - Parameter collectionViewSize: Size of the collection view
     /// - Returns: Size of this element in the collection view
-    func cellSize(in collectionViewSize: CGSize) -> CGSize
+    func size(in collectionViewSize: CGSize) -> CGSize
 }
 
 // MARK: - FlowLayout

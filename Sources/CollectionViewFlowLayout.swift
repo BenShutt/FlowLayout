@@ -21,7 +21,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     open var configuration = FlowLayoutConfiguration()
 
     /// The elements and their associated frames
-    private var layout = Layout()
+    private(set) var layout = Layout()
 
     /// Cache of the layout attributes
     private var attributes: AttributesMap = [:]
@@ -77,7 +77,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     // MARK: - Layout
 
     /// The content to layout in the collection view
-    open func redraw(elements: [Element]) {
+    open func redraw(_ elements: [Element]) {
         redrawLayout(elements: elements)
         invalidateLayout()
     }

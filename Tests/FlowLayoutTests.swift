@@ -159,7 +159,7 @@ final class FlowLayoutTests: XCTestCase {
 private struct TestCell: FlowLayoutSized, Equatable {
     var frame: CGRect
 
-    func cellSize(in collectionViewSize: CGSize) -> CGSize {
+    func size(in collectionViewSize: CGSize) -> CGSize {
         frame.size
     }
 
