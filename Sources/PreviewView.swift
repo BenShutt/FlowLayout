@@ -5,6 +5,7 @@
 //  Created by Ben Shutt on 20/08/2024.
 //
 
+#if canImport(UIKit)
 import SwiftUI
 
 // MARK: - Block
@@ -67,29 +68,17 @@ struct BlockView: View {
 
 class CollectionViewController: UICollectionViewController {
     typealias Layout = CollectionViewFlowLayout<Block>
-    private let reuseIdentifier = "Cell"
 
+    private let reuseIdentifier = "FlowLayoutCell"
     private var layout: Layout {
-        let layout = collectionViewLayout as? Layout
-        guard let layout else { fatalError("Layout") }
-        return layout
-    }
-
-    func setBlocks(blocks: [Block]) {
-        layout.redraw(blocks)
-        guard isViewLoaded else { return }
-        collectionView.reloadData()
+        collectionViewLayout as! Layout
     }
 
     // MARK: - Init
 
-    init() {
+    init(configuration: FlowLayoutConfiguration) {
         let layout = Layout()
-        layout.configuration = .init(
-            hSpacing: 10,
-            vSpacing: 20,
-            padding: .init(top: 5, leading: 5, bottom: 5, trailing: 5)
-        )
+        layout.configuration = configuration
         super.init(collectionViewLayout: layout)
     }
 
@@ -113,14 +102,14 @@ class CollectionViewController: UICollectionViewController {
     override func numberOfSections(
         in collectionView: UICollectionView
     ) -> Int {
-        layout.layout.frames.count
+        layout.numberOfSections
     }
 
     override func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        layout.layout.frames[section].count
+        layout.numberOfItemsInSection(section: section)
     }
 
     override func collectionView(
@@ -158,6 +147,14 @@ class CollectionViewController: UICollectionViewController {
             animated: false
         )
     }
+
+    // MARK: - Redraw
+
+    func redraw(blocks: [Block]) {
+        layout.redraw(blocks)
+        guard isViewLoaded else { return }
+        collectionView.reloadData()
+    }
 }
 
 // MARK: - CollectionView
@@ -166,14 +163,18 @@ struct CollectionView: UIViewControllerRepresentable {
     @ObservedObject var manager: BlockManager
 
     func makeUIViewController(context: Context) -> CollectionViewController {
-        CollectionViewController()
+        CollectionViewController(configuration: .init(
+            hSpacing: 10,
+            vSpacing: 20,
+            padding: .init(top: 5, leading: 5, bottom: 5, trailing: 5)
+        ))
     }
 
     func updateUIViewController(
         _ viewController: CollectionViewController,
         context: Context
     ) {
-        viewController.setBlocks(blocks: manager.blocks)
+        viewController.redraw(blocks: manager.blocks)
     }
 }
 
@@ -195,3 +196,4 @@ struct PreviewView: View {
 #Preview {
     PreviewView()
 }
+#endif

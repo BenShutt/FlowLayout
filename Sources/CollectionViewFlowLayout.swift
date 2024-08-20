@@ -21,10 +21,20 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     open var configuration = FlowLayoutConfiguration()
 
     /// The elements and their associated frames
-    private(set) var layout = Layout()
+    private var flowLayout = Layout()
 
     /// Cache of the layout attributes
     private var attributes: AttributesMap = [:]
+
+    // MARK: - Helper
+
+    var numberOfSections: Int {
+        flowLayout.frames.count
+    }
+
+    func numberOfItemsInSection(section: Int) -> Int {
+        flowLayout.frames[section].count
+    }
 
     // MARK: - UICollectionViewLayout
 
@@ -34,7 +44,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     }
 
     override open var collectionViewContentSize: CGSize {
-        layout.contentSize
+        flowLayout.contentSize
     }
 
     override open func shouldInvalidateLayout(
@@ -84,7 +94,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
 
     /// Redraw with the existing layout
     private func redrawLayout() {
-        let rows = layout.frames.flatMap { $0 }
+        let rows = flowLayout.frames.flatMap { $0 }
         let elements = rows.map { $0.element }
         redrawLayout(elements: elements)
     }
@@ -92,18 +102,18 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     /// Reset and re-build the layout properties
     private func redrawLayout(elements: [Element]) {
         guard let collectionView else {
-            layout = Layout()
+            flowLayout = Layout()
             attributes = [:]
             return
         }
 
-        layout = FlowLayoutBuilder(
+        flowLayout = FlowLayoutBuilder(
             collectionViewSize: collectionView.bounds.size,
             configuration: configuration
         )
         .build(elements: elements)
 
-        let sections = layout.frames.enumerated()
+        let sections = flowLayout.frames.enumerated()
         attributes = sections.reduce(into: [:]) { map, row in
             row.element.enumerated().forEach { item, frame in
                 let indexPath = IndexPath(item: item, section: row.offset)
@@ -117,7 +127,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
 
     /// Subscript mapping index path into 2D array
     open subscript(indexPath: IndexPath) -> Layout.Frame {
-        layout[indexPath]
+        flowLayout[indexPath]
     }
 }
 #endif
