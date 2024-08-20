@@ -38,4 +38,5 @@ A subclass of [UICollectionViewLayout](https://developer.apple.com/documentation
 
 ## Notes
 
-Multiple types can be achieved with enum.
+- Multiple types can be achieved with an enum
+- Generics are propagated through so the element can be passed with its respective frame. This may mean the element is stored twice. A workaround would be using a, say, `String` ID 
