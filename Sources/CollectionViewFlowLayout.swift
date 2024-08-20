@@ -21,19 +21,24 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     open var configuration = FlowLayoutConfiguration()
 
     /// The elements and their associated frames
-    private var flowLayout = Layout()
+    private var attributes = LayoutAttributes<Element>()
 
-    /// Cache of the layout attributes
-    private var attributes: AttributesMap = [:]
+    /// Sized data to layout
+    open var elements: [Element] = [] {
+        didSet {
+            redrawLayout()
+            invalidateLayout()
+        }
+    }
 
-    // MARK: - Helper
+    // MARK: - Collection Delegate
 
     open var numberOfSections: Int {
-        flowLayout.frames.count
+        attributes.numberOfSections
     }
 
     open func numberOfItemsInSection(section: Int) -> Int {
-        flowLayout.frames[section].count
+        attributes.numberOfItemsInSection(section: section)
     }
 
     // MARK: - UICollectionViewLayout
@@ -44,7 +49,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     }
 
     override open var collectionViewContentSize: CGSize {
-        flowLayout.contentSize
+        attributes.contentSize
     }
 
     override open func shouldInvalidateLayout(
@@ -57,77 +62,37 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     override open func layoutAttributesForItem(
         at indexPath: IndexPath
     ) -> UICollectionViewLayoutAttributes? {
-        attributes[indexPath]
+        attributes.attributes[indexPath]
     }
 
     override open func layoutAttributesForElements(
         in rect: CGRect
     ) -> [UICollectionViewLayoutAttributes]? {
-        attributes.values.filter { attributes in
+        attributes.attributes.values.filter { attributes in
             rect.intersects(attributes.frame)
         }
     }
 
-    // MARK: - Attributes
-
-    /// Make a new layout attributes instance
-    /// - Parameters:
-    ///   - indexPath: Index path of the cell
-    ///   - frame: Frame of the cell
-    /// - Returns: A new layout attributes instance
-    private func makeAttributes(
-        indexPath: IndexPath,
-        frame: CGRect
-    ) -> UICollectionViewLayoutAttributes {
-        let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-        attributes.frame = frame
-        return attributes
-    }
-
     // MARK: - Layout
 
-    /// The content to layout in the collection view
-    open func redraw(_ elements: [Element]) {
-        redrawLayout(elements: elements)
-        invalidateLayout()
-    }
-
-    /// Redraw with the existing layout
-    private func redrawLayout() {
-        let rows = flowLayout.frames.flatMap { $0 }
-        let elements = rows.map { $0.element }
-        redrawLayout(elements: elements)
-    }
-
-    /// Reset and re-build the layout properties
-    private func redrawLayout(elements: [Element]) {
+    /// Recompute the layout properties
+    open func redrawLayout() {
         guard let collectionView else {
-            flowLayout = Layout()
-            attributes = [:]
+            attributes = LayoutAttributes()
             return
         }
 
-        flowLayout = FlowLayoutBuilder(
+        let flowLayout = FlowLayoutBuilder(
             collectionViewSize: collectionView.bounds.size,
             configuration: configuration
-        )
-        .build(elements: elements)
+        ).build(elements: elements)
 
-        let sections = flowLayout.frames.enumerated()
-        attributes = sections.reduce(into: [:]) { map, row in
-            row.element.enumerated().forEach { item, frame in
-                let indexPath = IndexPath(item: item, section: row.offset)
-                map[indexPath] = makeAttributes(
-                    indexPath: indexPath,
-                    frame: frame.frame
-                )
-            }
-        }
+        attributes = LayoutAttributes(flowLayout: flowLayout)
     }
 
     /// Subscript mapping index path into 2D array
-    open subscript(indexPath: IndexPath) -> Layout.Frame {
-        flowLayout[indexPath]
+    open subscript(indexPath: IndexPath) -> Element {
+        attributes[indexPath]
     }
 }
 #endif

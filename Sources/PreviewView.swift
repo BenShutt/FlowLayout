@@ -127,7 +127,7 @@ class CollectionViewController: UICollectionViewController {
             Button(action: {
                 // Implement...
             }, label: {
-                BlockView(block: model.element)
+                BlockView(block: model)
             })
             .buttonStyle(PlainButtonStyle())
         }
@@ -152,7 +152,7 @@ class CollectionViewController: UICollectionViewController {
     // MARK: - Redraw
 
     func redraw(blocks: [Block]) {
-        layout.redraw(blocks)
+        layout.elements = blocks
         guard isViewLoaded else { return }
         collectionView.reloadData()
     }
