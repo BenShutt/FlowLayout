@@ -8,30 +8,33 @@
 #if canImport(UIKit)
 import UIKit
 
-/// Essentially an extension of `FlowLayout` adding `UICollectionViewLayoutAttributes`
-/// to be used by `CollectionViewFlowLayout`.
+/// Essentially an extension of `FlowLayout` adding a cache mapping index path
+/// to `UICollectionViewLayoutAttributes`
 struct LayoutAttributes<Element: FlowLayoutSized> {
-    var contentSize: CGSize
-    var frames: [[FlowLayout<Element>.Frame]]
+    typealias Layout = FlowLayout<Element>
+    typealias Frame = Layout.Frame
+
+    var flowLayout: Layout
     var attributes: [IndexPath: UICollectionViewLayoutAttributes]
 
+    var contentSize: CGSize {
+        flowLayout.contentSize
+    }
+
+    var frames: [[Frame]] {
+        flowLayout.frames
+    }
+
     var numberOfSections: Int {
-        frames.count
+        flowLayout.frames.count
     }
 
     func numberOfItemsInSection(section: Int) -> Int {
-        frames[section].count
+        flowLayout.frames[section].count
     }
 
-    init() {
-        contentSize = .zero
-        frames = []
-        attributes = [:]
-    }
-
-    init(flowLayout: FlowLayout<Element>) {
-        contentSize = flowLayout.contentSize
-        frames = flowLayout.frames
+    init(flowLayout: Layout = Layout()) {
+        self.flowLayout = flowLayout
 
         let sections = flowLayout.frames.enumerated()
         attributes = sections.reduce(into: [:]) { map, row in
@@ -44,8 +47,8 @@ struct LayoutAttributes<Element: FlowLayoutSized> {
         }
     }
 
-    subscript(indexPath: IndexPath) -> Element {
-        frames[indexPath.section][indexPath.item].element
+    subscript(indexPath: IndexPath) -> Frame {
+        flowLayout[indexPath]
     }
 }
 

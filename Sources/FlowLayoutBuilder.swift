@@ -10,8 +10,11 @@ import SwiftUI
 /// Given a configuration, compute a collection of sized elements into their frames in flow layout
 open class FlowLayoutBuilder<Element: FlowLayoutSized> {
 
+    /// Alias to a flow layout with the generic element
+    public typealias Layout = FlowLayout<Element>
+
     /// Alias to a frame with the generic element
-    public typealias Frame = FlowLayout<Element>.Frame
+    public typealias Frame = Layout.Frame
 
     /// Size of the collection view bounds
     open var collectionViewSize: CGSize
@@ -119,7 +122,7 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
     /// Build a flow layout from the given elements
     /// - Parameter elements: The elements to layout
     /// - Returns: The elements and their associated frames
-    open func build(elements: [Element]) -> FlowLayout<Element> {
+    open func build(elements: [Element]) -> Layout {
         // Iterate through the elements and compute their frames
         reset()
         elements.forEach { add(element: $0) }
@@ -129,7 +132,7 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
 
         // Get the maxY coordinate of the last row.
         // If there are no elements return empty
-        guard let maxY = frames.last?.maxY else { return FlowLayout() }
+        guard let maxY = frames.last?.maxY else { return .init() }
 
         // Return the build result
         return .init(

@@ -92,7 +92,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
 
     /// Subscript mapping index path into 2D array
     open subscript(indexPath: IndexPath) -> Element {
-        attributes[indexPath]
+        attributes[indexPath].element
     }
 }
 #endif
