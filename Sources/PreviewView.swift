@@ -95,6 +95,7 @@ class CollectionViewController: UICollectionViewController {
             UICollectionViewCell.self,
             forCellWithReuseIdentifier: reuseIdentifier
         )
+        collectionView.reloadData()
     }
 
     // MARK: - UICollectionViewDataSource
