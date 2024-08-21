@@ -10,7 +10,7 @@ import SwiftUI
 
 // MARK: - Block
 
-struct Block: FlowLayoutSized {
+private struct Block: FlowLayoutSized {
     var width: CGFloat
     var height: CGFloat
     var color: Color
@@ -22,7 +22,7 @@ struct Block: FlowLayoutSized {
 
 // MARK: - Blocks
 
-@MainActor final class BlockManager: ObservableObject {
+@MainActor private final class BlockManager: ObservableObject {
     @Published private(set) var blocks: [Block] = []
 
     func build() async {
@@ -42,7 +42,7 @@ struct Block: FlowLayoutSized {
 
 // MARK: - BlockView
 
-struct BlockView: View {
+private struct BlockView: View {
     var block: Block
 
     private var title: String {
@@ -51,7 +51,6 @@ struct BlockView: View {
 
     var body: some View {
         block.color.opacity(0.2)
-            .frame(width: block.width, height: block.height)
             .overlay {
                 Text(title)
                     .font(.system(size: 20))
@@ -66,7 +65,7 @@ struct BlockView: View {
 
 // MARK: - CollectionViewController
 
-class CollectionViewController: UICollectionViewController {
+private class CollectionViewController: UICollectionViewController {
     typealias Layout = CollectionViewFlowLayout<Block>
 
     private let reuseIdentifier = "FlowLayoutCell"
@@ -117,7 +116,7 @@ class CollectionViewController: UICollectionViewController {
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        let model = layout[indexPath]
+        let model = layout[indexPath].element
 
         let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: reuseIdentifier,
@@ -160,7 +159,7 @@ class CollectionViewController: UICollectionViewController {
 
 // MARK: - CollectionView
 
-struct CollectionView: UIViewControllerRepresentable {
+private struct CollectionView: UIViewControllerRepresentable {
     @ObservedObject var manager: BlockManager
 
     func makeUIViewController(context: Context) -> CollectionViewController {
@@ -181,7 +180,7 @@ struct CollectionView: UIViewControllerRepresentable {
 
 // MARK: - PreviewView
 
-struct PreviewView: View {
+private struct PreviewView: View {
     @StateObject private var manager = BlockManager()
 
     var body: some View {

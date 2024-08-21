@@ -21,7 +21,10 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     open var configuration = FlowLayoutConfiguration()
 
     /// The elements and their associated frames
-    private var attributes = LayoutAttributes<Element>()
+    private var flowLayout = Layout()
+
+    /// Cache of the layout attributes
+    private var attributes: AttributesMap = [:]
 
     /// Sized data to layout
     open var elements: [Element] = [] {
@@ -34,11 +37,11 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     // MARK: - Collection Delegate
 
     open var numberOfSections: Int {
-        attributes.numberOfSections
+        flowLayout.frames.count
     }
 
     open func numberOfItemsInSection(section: Int) -> Int {
-        attributes.numberOfItemsInSection(section: section)
+        flowLayout.frames[section].count
     }
 
     // MARK: - UICollectionViewLayout
@@ -49,7 +52,7 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     }
 
     override open var collectionViewContentSize: CGSize {
-        attributes.contentSize
+        flowLayout.contentSize
     }
 
     override open func shouldInvalidateLayout(
@@ -62,13 +65,13 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     override open func layoutAttributesForItem(
         at indexPath: IndexPath
     ) -> UICollectionViewLayoutAttributes? {
-        attributes.attributes[indexPath]
+        attributes[indexPath]
     }
 
     override open func layoutAttributesForElements(
         in rect: CGRect
     ) -> [UICollectionViewLayoutAttributes]? {
-        attributes.attributes.values.filter { attributes in
+        attributes.values.filter { attributes in
             rect.intersects(attributes.frame)
         }
     }
@@ -78,21 +81,40 @@ open class CollectionViewFlowLayout<Element: FlowLayoutSized>: UICollectionViewL
     /// Recompute the layout properties
     open func redrawLayout() {
         guard let collectionView else {
-            attributes = LayoutAttributes()
+            flowLayout = .init()
+            attributes = [:]
             return
         }
 
-        let flowLayout = FlowLayoutBuilder(
+        flowLayout = FlowLayoutBuilder(
             collectionViewSize: collectionView.bounds.size,
             configuration: configuration
-        ).build(elements: elements)
+        )
+        .build(elements: elements)
 
-        attributes = LayoutAttributes(flowLayout: flowLayout)
+        attributes = flowLayout.frames
+            .flatMap { $0 }
+            .reduce(into: [:]) { map, frame in
+                map[frame.id] = .init(
+                    indexPath: frame.id,
+                    frame: frame.frame
+                )
+            }
     }
 
     /// Subscript mapping index path into 2D array
-    open subscript(indexPath: IndexPath) -> Element {
-        attributes[indexPath].element
+    open subscript(indexPath: IndexPath) -> Layout.Frame {
+        flowLayout[indexPath]
     }
 }
+
+// MARK: - UICollectionViewLayoutAttributes + Extensions
+
+private extension UICollectionViewLayoutAttributes {
+    convenience init(indexPath: IndexPath, frame: CGRect) {
+        self.init(forCellWith: indexPath)
+        self.frame = frame
+    }
+}
+
 #endif

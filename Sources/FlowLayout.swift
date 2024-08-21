@@ -22,29 +22,36 @@ public protocol FlowLayoutSized {
 public struct FlowLayout<Element: FlowLayoutSized> {
 
     /// An element to layout and its associated frame
-    public struct Frame {
+    public struct Frame: Identifiable {
+
+        /// The elements index in the 2D array.
+        /// Section is the row index
+        /// Item in the index in the row
+        public let id: IndexPath
 
         /// An element to layout
-        public var element: Element
+        public let element: Element
 
         /// The associated frame in the layout
-        public var frame: CGRect
+        public let frame: CGRect
 
         /// Public memberwise initializer
         public init(
+            id: IndexPath,
             element: Element,
             frame: CGRect
         ) {
+            self.id = id
             self.element = element
             self.frame = frame
         }
     }
 
     /// Size of the content
-    public var contentSize: CGSize
+    public let contentSize: CGSize
 
     /// Rows of elements and their associated frames
-    public var frames: [[Frame]]
+    public let frames: [[Frame]]
 
     /// Public memberwise initializer
     public init(

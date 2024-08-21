@@ -80,6 +80,10 @@ open class FlowLayoutBuilder<Element: FlowLayoutSized> {
     ///   - size: The size of the element
     private func commit(element: Element, size: CGSize) {
         currentRow.append(.init(
+            id: .init(
+                item: currentRow.count,
+                section: frames.count
+            ),
             element: element,
             frame: CGRect(
                 x: originX,
