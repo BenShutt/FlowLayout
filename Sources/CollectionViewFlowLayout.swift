@@ -116,5 +116,4 @@ private extension UICollectionViewLayoutAttributes {
         self.frame = frame
     }
 }
-
 #endif
