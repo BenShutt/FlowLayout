@@ -1,7 +1,6 @@
 # Flow Layout
 
 Logic to calculate the frames in a left-to-right flow layout.
-A `UICollectionViewLayout` subclass for layout in a `UICollectionView`.
 
 ## Installation (SwiftPM)
 
@@ -19,6 +18,19 @@ dependencies: [
 Remembering to add the new dependency to your target.
 
 ## Entities
+
+### FlowLayoutView
+
+A SwiftUI View that renders its elements in a flow layout
+
+```swift
+FlowLayoutView([
+    TagView() // ...
+], configuration: .init(
+    hSpacing: 5,
+    vSpacing: 10
+))
+```
 
 ### FlowLayoutBuilder
 
@@ -38,5 +50,5 @@ A subclass of [UICollectionViewLayout](https://developer.apple.com/documentation
 
 ## Notes
 
-- Multiple types can be achieved with an enum
+- Multiple types can be achieved with a wrapper, e.g. an enum
 - Generics are propagated through so the element can be passed with its respective frame. This may mean the element is stored twice. A workaround would be using a, say, `String` ID 
