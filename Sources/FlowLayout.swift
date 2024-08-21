@@ -16,8 +16,6 @@ public protocol FlowLayoutSized {
     func size(in boundsSize: CGSize) -> CGSize
 }
 
-// MARK: - FlowLayout
-
 /// A 2D array of rows of elements and their associated frames
 public struct FlowLayout<Element: FlowLayoutSized> {
 
