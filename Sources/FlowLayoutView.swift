@@ -121,7 +121,7 @@ private struct ColorView: FlowLayoutSized, View {
         color
     }
 
-    func size(in collectionViewSize: CGSize) -> CGSize {
+    func size(in boundsSize: CGSize) -> CGSize {
         .init(width: width, height: height)
     }
 }

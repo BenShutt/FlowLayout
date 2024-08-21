@@ -15,7 +15,7 @@ private struct Block: FlowLayoutSized {
     var height: CGFloat
     var color: Color
 
-    func size(in collectionViewSize: CGSize) -> CGSize {
+    func size(in boundsSize: CGSize) -> CGSize {
         .init(width: width, height: height)
     }
 }
