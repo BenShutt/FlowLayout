@@ -10,6 +10,7 @@ import SwiftUI
 public struct FlowLayoutView<Element: FlowLayoutSized & View>: View {
     private typealias Layout = FlowLayout<Element>
 
+    @State private var lastCriteria = RedrawCriteria()
     @State private var flowLayout = Layout()
 
     public var elements: [Element]
@@ -30,9 +31,18 @@ public struct FlowLayoutView<Element: FlowLayoutSized & View>: View {
         flowLayout.frames.flatMap { $0 }
     }
 
+    private func sizes(in boundsSize: CGSize) -> [CGSize] {
+        elements.map { $0.size(in: boundsSize) }
+    }
+
     private func redraw(size: CGSize) {
-        let lastWidth = flowLayout.contentSize.width
-        guard !lastWidth.equals(size.width) else { return }
+        let criteria = RedrawCriteria(
+            width: size.width,
+            sizes: sizes(in: size)
+        )
+        guard criteria != lastCriteria else { return }
+        lastCriteria = criteria
+
         flowLayout = FlowLayoutBuilder(
             collectionViewSize: size,
             configuration: configuration
@@ -96,6 +106,17 @@ public extension FlowLayoutView {
             case .infinity: .infinity
             }
         }
+    }
+}
+
+// MARK: - RedrawCriteria
+
+private struct RedrawCriteria: Equatable {
+    var width: CGFloat = 0
+    var sizes: [CGSize] = []
+
+    static func == (lhs: RedrawCriteria, rhs: RedrawCriteria) -> Bool {
+        lhs.width.equals(rhs.width) && lhs.sizes == rhs.sizes
     }
 }
 
