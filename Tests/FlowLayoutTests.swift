@@ -96,8 +96,8 @@ final class FlowLayoutTests: XCTestCase {
             )
         )
         .build(elements: cells)
-        let frames = result.frames
 
+        let frames = result.frames
         XCTAssertEqual(frames.count, 7)
 
         XCTAssertEqual(frames[0].count, 3)

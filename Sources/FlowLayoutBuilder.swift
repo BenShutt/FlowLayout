@@ -8,6 +8,7 @@
 import SwiftUI
 
 /// Given a configuration, compute a collection of sized elements into their frames in flow layout
+@MainActor
 open class FlowLayoutBuilder<Element: FlowLayoutSized> {
 
     /// Alias to a flow layout with the generic element

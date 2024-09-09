@@ -8,6 +8,7 @@
 import SwiftUI
 
 /// An entity that has a size in a flow layout
+@MainActor
 public protocol FlowLayoutSized {
 
     /// Get the size of this element given the parent bounds size
